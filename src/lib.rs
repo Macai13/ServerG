@@ -7,6 +7,7 @@ fn rust_modules(_py: Python, m: &PyModule) -> PyResult<()>
 {
     m.add_function(wrap_pyfunction!(check_server_status, m)?)?;
     m.add_function(wrap_pyfunction!(start_server, m)?)?;
+    m.add_function(wrap_pyfunction!(is_server_dir_empty, m)?)?;
     Ok(())
 }
 
@@ -38,4 +39,16 @@ fn start_server() -> ()
     Command::new("powershell")
             .arg(".\\scripts\\start.ps1")
             .spawn();
+}
+
+#[pyfunction]
+fn is_server_dir_empty() -> PyResult<bool>
+{
+    match std::path::PathBuf::from(".\\server")
+                            .read_dir()
+                            .map(|mut i| i.next().is_none())
+    {
+        Ok(v) => return Ok(v),
+        Err(_) => return Ok(true),
+    }
 }
