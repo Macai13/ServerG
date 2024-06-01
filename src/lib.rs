@@ -1,5 +1,9 @@
 use pyo3::prelude::*;
-use std::process::Command;
+use std::{os::windows::process::CommandExt, process::Command};
+#[allow(unused_imports)]
+use std::thread;
+#[allow(unused_imports)]
+use std::time::Duration;
 
 #[pymodule]
 #[pyo3(name = "rust_modules")]
@@ -10,6 +14,9 @@ fn rust_modules(_py: Python, m: &PyModule) -> PyResult<()>
     m.add_function(wrap_pyfunction!(download_create_server, m)?)?;
     m.add_function(wrap_pyfunction!(download_update_server, m)?)?;
     m.add_function(wrap_pyfunction!(is_dir_empty, m)?)?;
+    m.add_function(wrap_pyfunction!(upload_server, m)?)?;
+    m.add_function(wrap_pyfunction!(update_log, m)?)?;
+    m.add_function(wrap_pyfunction!(pull_log_from_gith, m)?)?;
     Ok(())
 }
 
@@ -18,6 +25,7 @@ fn check_server_status() -> PyResult<String>
 {
     match Command::new("powershell")
                   .arg("Get-Process | Where-Object { $_.MainWindowTitle -like '*7c31ok9w0fbn33*' }")
+                  .creation_flags(0x08000000)
                   .output()
     {
         Ok(output) => 
@@ -38,9 +46,11 @@ fn check_server_status() -> PyResult<String>
 #[pyfunction]
 fn start_server() -> ()
 {
-    Command::new("powershell")
-            .arg(".\\scripts\\start.ps1")
-            .spawn();
+    thread::spawn(|| {
+        Command::new("powershell")
+                .arg(".\\scripts\\start.ps1")
+                .spawn();
+    });
 }
 
 #[pyfunction]
@@ -74,14 +84,47 @@ fn download_create_server() -> ()
     }
 }
 
+#[allow(unused_must_use)]
+#[pyfunction]
+fn upload_server() -> ()
+{
+    thread::spawn(|| {
+        Command::new("powershell")
+                .arg("Set-Location server ; git add . ; git commit -m '.' ; git push")
+                .spawn();
+    });
+}
+
 #[pyfunction]
 fn download_update_server() -> ()
 {
     match Command::new("powershell")
             .arg("Set-Location server ; git checkout . ; git pull >> ../logs/git_log.txt")
+            .creation_flags(0x08000000)
             .spawn()
     {
         Ok(_) => (),
         Err(_) => download_create_server()
     }
+}
+
+#[allow(unused_must_use)]
+#[pyfunction]
+fn pull_log_from_gith() -> ()
+{
+    Command::new("powershell")
+            .arg("Set-Location ./logs/minecraft-logs/ ; git pull")
+            .creation_flags(0x08000000)
+            .spawn();
+}
+
+#[allow(unused_must_use)]
+#[pyfunction]
+fn update_log() -> ()
+{
+    thread::spawn(|| {
+        Command::new("powershell")
+                .arg("cd ./logs/minecraft-logs/ ; git add * ; git commit -m '.' ; git push")
+                .spawn();
+    });
 }
