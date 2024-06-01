@@ -7,22 +7,13 @@ import time
 import os
 import rust_modules
 
-class Downloader(QObject):
-    finished = pyqtSignal()
-
-    def download(self):
-        if rust_modules.is_server_dir_empty():
-            try:
-                os.system("git clone https://github.com/vctorfarias/minecraft-server-01 ./server")
-            except:
-                os.system("mkdir server")
-                os.system("git clone https://github.com/vctorfarias/minecraft-server-01 ./server")
+class Downloader(QThread):
+    def run(self):
+        if rust_modules.is_dir_empty(".\\server"):
+            rust_modules.download_create_server()
         else:
-            try:
-                os.system("cd server & git checkout . & git pull")
-            except:
-                os.system("git clone https://github.com/vctorfarias/minecraft-server-01 ./server")
-
+            rust_modules.download_update_server()
+        
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -39,6 +30,9 @@ class MainWindow(QMainWindow):
         self.ui.startServerBtn.clicked.connect(self.start_server)
         self.ui.downloadServerBtn.clicked.connect(self.download_server)
 
+        if rust_modules.is_dir_empty(".\\config"):
+            self.config_dialog()
+
         self.show()
 
     
@@ -48,28 +42,16 @@ class MainWindow(QMainWindow):
 
     def download_server(self):
         if rust_modules.check_server_status() == "Offline":
-            self.thread = QThread()
-
             self.downloader = Downloader()
-
-            self.downloader.moveToThread(self.thread)
-
-            self.thread.started.connect(self.downloader.download)
-
-            self.downloader.finished.connect(self.thread.quit)
-            self.downloader.finished.connect(self.downloader.deleteLater)
-            self.thread.finished.connect(self.thread.deleteLater)
             
-            self.thread.start()
-
-            self.ui.downloadServerBtn.setEnabled(False)
+            self.downloader.start()
         else:
             self.error_dialog("Server tá online, dê 'stop' antes de fazer download")
 
             return
         
 
-
+    # TODO
     def upload_server(self):
         pass
     
@@ -81,4 +63,9 @@ class MainWindow(QMainWindow):
 
     # TODO
     def error_dialog(self, error: str):
+        pass
+
+    
+    # TODO
+    def config_dialog(self):
         pass
