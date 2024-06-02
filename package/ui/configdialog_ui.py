@@ -18,6 +18,9 @@ class Ui_Dialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("design\\../assets/config_icon.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        Dialog.setWindowIcon(icon)
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=Dialog)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(290, 290, 211, 61))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
@@ -48,8 +51,8 @@ class Ui_Dialog(object):
         self.nameLabel.setGeometry(QtCore.QRect(20, 0, 249, 41))
         self.nameLabel.setObjectName("nameLabel")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(parent=Dialog)
-        self.plainTextEdit.setGeometry(QtCore.QRect(20, 30, 249, 25))
-        self.plainTextEdit.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.plainTextEdit.setGeometry(QtCore.QRect(20, 30, 249, 30))
+        self.plainTextEdit.setMaximumSize(QtCore.QSize(16777215, 30))
         self.plainTextEdit.setObjectName("plainTextEdit")
         self.horizontalSlider = QtWidgets.QSlider(parent=Dialog)
         self.horizontalSlider.setGeometry(QtCore.QRect(30, 100, 160, 22))
@@ -75,7 +78,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Config"))
+        Dialog.setWindowTitle(_translate("Dialog", "Configurações"))
         self.saveBtn.setText(_translate("Dialog", "Salvar"))
         self.cancelBtn.setText(_translate("Dialog", "Cancelar"))
         self.nameLabel.setText(_translate("Dialog", "Nome:"))

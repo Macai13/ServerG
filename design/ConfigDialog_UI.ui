@@ -17,7 +17,11 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Config</string>
+   <string>Configurações</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/config_icon.png</normaloff>../assets/config_icon.png</iconset>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
@@ -92,13 +96,13 @@
      <x>20</x>
      <y>30</y>
      <width>249</width>
-     <height>25</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="maximumSize">
     <size>
      <width>16777215</width>
-     <height>25</height>
+     <height>30</height>
     </size>
    </property>
   </widget>

@@ -1,35 +1,14 @@
 from PyQt6.QtWidgets import QMainWindow, QDialog
 from PyQt6.QtGui import QMovie
-from PyQt6.QtCore import QThread
+from package.downloader import Downloader
+from package.log import Log
+from package.uploader import Uploader
 from package.ui.mainwindow_ui import Ui_MainWindow
-from package.ui import configdialog_ui
+from package.ui import configdialog_ui, errordialog_ui
 import subprocess
 import datetime
 import rust_modules
 
-class Log(QThread):
-    def run(self):
-        subprocess.call("mkdir logs", creationflags=0x08000000, shell=True)
-        subprocess.call("mkdir logs/minecraft-logs", creationflags=0x08000000, shell=True)
-        subprocess.call("git clone https://github.com/vctorfarias/minecraft-log-1 ./logs/minecraft-logs", creationflags=0x08000000, shell=True)
-        open("logs/git_log.txt", "w")
-
-
-class Uploader(QThread):
-    def run(self):
-        if rust_modules.is_dir_empty(".\\server"):
-            return 
-        else:
-            rust_modules.upload_server()
-
-
-class Downloader(QThread):
-    def run(self):
-        if rust_modules.is_dir_empty(".\\server"):
-            rust_modules.download_create_server()
-        else:
-            rust_modules.download_update_server()
-        
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -64,7 +43,14 @@ class MainWindow(QMainWindow):
 
     
     def start_server(self):
-        rust_modules.start_server()
+        user_file = open("./userconfig/user.properties", "r")
+        user_file.readline()
+        user_file.readline()
+        user_file.readline()
+        user_file.readline()
+        ram = user_file.readline().replace('\n', '')
+
+        rust_modules.start_server(ram)
 
 
     def download_server(self):
@@ -85,10 +71,14 @@ class MainWindow(QMainWindow):
             self._uploader = Uploader()
             
             self._uploader.start()
-            self.update_log("upload")
-            rust_modules.update_log()
+
+            error = self._uploader.error.connect(lambda: self.error_dialog("Diretório 'server' não se encontra nos arquivos"))
+
+            if not error:
+                self.update_log("upload")
+                rust_modules.update_log()
         else:
-            self.error_dialog("Server tá online, dê 'stop' antes de fazer download")
+            self.error_dialog("Server tá online, dê 'stop' antes de fazer upload")
 
             return
     
@@ -104,9 +94,16 @@ class MainWindow(QMainWindow):
         pass
 
 
-    # TODO
     def error_dialog(self, error: str):
-        pass
+        dialog = QDialog()
+        ui = errordialog_ui.Ui_Dialog()
+        ui.setupUi(dialog)
+
+        ui.error.setText(error)
+
+        dialog.exec()
+
+        return True
 
     
     def config_dialog(self):
@@ -120,6 +117,7 @@ class MainWindow(QMainWindow):
 
         ui.cancelBtn.clicked.connect(dialog.close)
         ui.saveBtn.clicked.connect(lambda: self.update_user_properties(ui.plainTextEdit.toPlainText(), ui.horizontalSlider.value()))
+        ui.saveBtn.clicked.connect(dialog.close)
 
         dialog.exec()
 

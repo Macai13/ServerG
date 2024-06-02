@@ -1,9 +1,7 @@
 use pyo3::prelude::*;
 use std::{os::windows::process::CommandExt, process::Command};
-#[allow(unused_imports)]
 use std::thread;
-#[allow(unused_imports)]
-use std::time::Duration;
+//use std::time::Duration;
 
 #[pymodule]
 #[pyo3(name = "rust_modules")]
@@ -44,11 +42,11 @@ fn check_server_status() -> PyResult<String>
 
 #[allow(unused_must_use)]
 #[pyfunction]
-fn start_server() -> ()
+fn start_server(ram: String) -> ()
 {
-    thread::spawn(|| {
+    thread::spawn(move || {
         Command::new("powershell")
-                .arg(".\\scripts\\start.ps1")
+                .arg(format!("$host.UI.RawUI.WindowTitle = '7c31ok9w0fbn33'; Set-Location ./server; java -Xms{} -Xmx{} -jar ./server.jar -nogui", ram, ram))
                 .spawn();
     });
 }
@@ -99,7 +97,7 @@ fn upload_server() -> ()
 fn download_update_server() -> ()
 {
     match Command::new("powershell")
-            .arg("Set-Location server ; git checkout . ; git pull >> ../logs/git_log.txt")
+            .arg("Set-Location server ; git checkout . ; git pull >> ../logs/git_pull_log.txt")
             .creation_flags(0x08000000)
             .spawn()
     {
@@ -113,7 +111,7 @@ fn download_update_server() -> ()
 fn pull_log_from_gith() -> ()
 {
     Command::new("powershell")
-            .arg("Set-Location ./logs/minecraft-logs/ ; git pull")
+            .arg("Set-Location ./logs/minecraft-logs/ ; git pull >> ../logs/git_pull_log.txt")
             .creation_flags(0x08000000)
             .spawn();
 }
@@ -125,6 +123,7 @@ fn update_log() -> ()
     thread::spawn(|| {
         Command::new("powershell")
                 .arg("cd ./logs/minecraft-logs/ ; git add * ; git commit -m '.' ; git push")
+                .creation_flags(0x08000000)
                 .spawn();
     });
 }
