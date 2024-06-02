@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 use std::{os::windows::process::CommandExt, process::Command};
-use std::thread;
+use std::{fs, thread};
 //use std::time::Duration;
 
 #[pymodule]
@@ -15,6 +15,8 @@ fn rust_modules(_py: Python, m: &PyModule) -> PyResult<()>
     m.add_function(wrap_pyfunction!(upload_server, m)?)?;
     m.add_function(wrap_pyfunction!(update_log, m)?)?;
     m.add_function(wrap_pyfunction!(pull_log_from_gith, m)?)?;
+    m.add_function(wrap_pyfunction!(is_owner, m)?)?;
+
     Ok(())
 }
 
@@ -126,4 +128,17 @@ fn update_log() -> ()
                 .creation_flags(0x08000000)
                 .spawn();
     });
+}
+
+#[pyfunction]
+fn is_owner(user: String) -> PyResult<bool>
+{
+    let owner = fs::read_to_string("./logs/minecraft-logs/owner.txt").unwrap();
+
+    if owner == user 
+    {
+        return Ok(true)
+    }
+
+    Ok(false)
 }
