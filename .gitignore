@@ -1,6 +1,7 @@
 /target
 server/
 logs/
+.env/
 
 # !!! needed to create .exe !!!
 rust_modules.pyd
