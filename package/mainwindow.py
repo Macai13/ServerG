@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
     def download_server(self):
         if rust_modules.check_server_status() == "Offline":
             if not rust_modules.is_owner("jndf381kfd093"):
-                self.error_dialog("Alguém ainda não deu upload no mapa depois de baixar (provavelmente)!")
+                self.error_dialog("Alguém ainda não deu upload no mapa\ndepois de baixar (provavelmente)!")
 
                 return
 
@@ -201,3 +201,5 @@ class MainWindow(QMainWindow):
 
         with open("./logs/minecraft-logs/owner.txt", "w") as own_f:
             own_f.write(new_owner)
+        
+        rust_modules.update_log()

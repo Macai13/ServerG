@@ -113,7 +113,7 @@ fn download_update_server() -> ()
 fn pull_log_from_gith() -> ()
 {
     Command::new("powershell")
-            .arg("Set-Location ./logs/minecraft-logs/ ; git pull >> ../logs/git_pull_log.txt")
+            .arg("Set-Location ./logs/minecraft-logs/ ; git pull >> ../git_pull_log.txt")
             .creation_flags(0x08000000)
             .spawn();
 }
